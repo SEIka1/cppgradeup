@@ -1,0 +1,3 @@
+/home/seika/cppgradeup/cppgradeup-ssh/members/test-user/taske1/build/CMakeFiles/solution.dir
+/home/seika/cppgradeup/cppgradeup-ssh/members/test-user/taske1/build/CMakeFiles/edit_cache.dir
+/home/seika/cppgradeup/cppgradeup-ssh/members/test-user/taske1/build/CMakeFiles/rebuild_cache.dir
