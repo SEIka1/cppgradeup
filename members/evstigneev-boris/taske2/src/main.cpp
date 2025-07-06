@@ -5,8 +5,6 @@
 #include <climits>
 
 static bool is_prime(int n) {
-    if (n < 2)
-        throw std::invalid_argument("cant be prime");
     if (n == 2)
         return true;
     if (n % 2 == 0)
@@ -39,13 +37,20 @@ bool is_twin_prime(int n) {
 }
 
 std::vector<int> primes_in_range(int start, int end) {
-    std::vector<bool> candidates(end + 1, true);
-    candidates[0] = candidates[1] = false;
+    if (start > end)
+        throw std::invalid_argument("start > end");
 
-    for (int i = 2; i * i <= end; i++) {
+    std::vector<bool> candidates(end + 1, false);
+	candidates[2] = true;
+
+    for (int i = 3; i <= end; i += 2) {
+        candidates[i] = true;
+    }
+    for (int i = 3; i * i <= end; i += 2) {
         if (candidates[i]) {
-            for (int j = i * i; j <= end; j += i)
+            for (int j = i * i; j <= end; j += 2 * i) {
                 candidates[j] = false;
+            }
         }
     }
 
@@ -59,34 +64,59 @@ std::vector<int> primes_in_range(int start, int end) {
 
 int main() {   
     int num;
-    int start;
-    int end;
     std::cout << "Enter the number: ";
     std::cin >> num;
 
-    if (is_prime(num)) {
-        std::cout << num << " is prime\n";
-        int next = next_prime(num);
-        std::cout << "next prime: " << next << "\n";
-
-        if (is_twin_prime(num))
-            std::cout << num << " and " << (num + 2) << " are twin primes\n";
-        else
-            std::cout << num << " and " << (num + 2) << " are not twin primes\n";
+    if (std::cin.fail()) {
+        std::cerr << "Input error";
+        return 1;
     }
 
+    try {
+        if (is_prime(num)) {
+            std::cout << num << " is prime\n";
+            int next = next_prime(num);
+            std::cout << "next prime: " << next << "\n";
+
+            if (is_twin_prime(num))
+            std::cout << num << " and " << (num + 2) << " are twin primes\n";
+            else
+                std::cout << num << " and " << (num + 2) << " are not twin primes\n";
+        }
+        else
+			std::cout << num << " is not prime\n";
+
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what();
+        return 1;
+    }
+
+    int start;
+    int end;
     std::cout << "enter a range of prime numbers: ";
     std::cin >> start >> end;
 
-    std::vector<int> primes = primes_in_range(start, end);
-    std::cout << "prime numbers from the range: ";
-    std::cout << "[";
-    for (size_t i = 0; i < primes.size(); ++i) {
-        std::cout << primes[i];
-        if (i + 1 < primes.size())
-            std::cout << ", ";
+    if (std::cin.fail()) {
+        std::cerr << "Input error";
+        return 1;
     }
-    std::cout << "]";
+    
+    try {
+        std::vector<int> primes = primes_in_range(start, end);
+        std::cout << "prime numbers from the range: ";
+        std::cout << "[";
+        for (size_t i = 0; i < primes.size(); ++i) {
+            std::cout << primes[i];
+            if (i + 1 < primes.size())
+                std::cout << ", ";
+        }
+        std::cout << "]";
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what();
+        return 1;
+    }
 
     std::cout << "\n";
     return 0;
