@@ -5,6 +5,8 @@
 #include <climits>
 
 static bool is_prime(int n) {
+    if (n < 2)
+        return false;
     if (n == 2)
         return true;
     if (n % 2 == 0)
@@ -19,7 +21,7 @@ static bool is_prime(int n) {
 
 int next_prime(int n) {
     if (n > INT_MAX - 100)
-        throw std::overflow_error("overfolw");
+        throw std::overflow_error("overflow");
 
     int cur = n + 1;
     while (true) {
@@ -39,6 +41,15 @@ bool is_twin_prime(int n) {
 std::vector<int> primes_in_range(int start, int end) {
     if (start > end)
         throw std::invalid_argument("start > end");
+
+    if (end < 0)
+        throw std::invalid_argument("negative range not allowed");
+
+    if (end < 2)
+        return std::vector<int>();
+
+	if (start < 2)
+		start = 2;
 
     std::vector<bool> candidates(end + 1, false);
 	candidates[2] = true;
