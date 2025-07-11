@@ -119,7 +119,7 @@ bool is_twin_prime(unsigned n) {
 std::vector<unsigned> primes_in_range(unsigned start, unsigned end) {
     if (start > end) return primes_in_range(end, start);
 
-    std::vector<bool> sieve = std::vector<bool>(end);
+    std::vector<bool> sieve = std::vector<bool>(end + 1);
 
     for (unsigned i = 2; i * i <= end; i++)
         if (!sieve[i])
