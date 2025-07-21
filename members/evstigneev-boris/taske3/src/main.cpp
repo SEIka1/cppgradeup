@@ -43,14 +43,19 @@ void sortCharacters(Character* chars, int size) {
     for (int i = 0; i < size - 1; i++) {
         for (int j = 0; j < size - i - 1; j++) {
             int k = 0;
-            while (chars[j].name[k] && chars[j+1].name[k] && 
-                   chars[j].name[k] == chars[j+1].name[k]) {
+            while (k < 20 && chars[j].name[k] != '\0' && chars[j+1].name[k] != '\0') {
+                char c1 = tolower(chars[j].name[k]);
+                char c2 = tolower(chars[j+1].name[k]);
+                
+                if (c1 != c2) {
+                    if (c1 > c2) {
+                        Character temp = chars[j];
+                        chars[j] = chars[j+1];
+                        chars[j+1] = temp;
+                    }
+                    break; 
+                }
                 k++;
-            }
-            if (chars[j].name[k] > chars[j+1].name[k]) {
-                Character temp = chars[j];
-                chars[j] = chars[j + 1];
-                chars[j + 1] = temp;
             }
         }
     }
@@ -99,25 +104,54 @@ bool addCharacter(Character* chars, int& size) {
 
     Character newChar;
     newChar.charClass = 0;
+    std::string input;
 
-    std::cout << "Enter name: ";
-    std::cin.getline(newChar.name, 20);
-    
-    std::cout << "Enter level (1-100): ";
-    while (!(std::cin >> newChar.level) || newChar.level < 1 || newChar.level > 100) {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    while (true) {
+        std::cout << "Enter name: ";
+        std::getline(std::cin, input);
+        
+        if (input.empty()) {
+            std::cout << "Name cannot be empty" << std::endl;
+            continue;
+        }
+        
+        if (input.length() >= 20) {
+            std::cout << "Name too long" << std::endl;
+            continue;
+        }
+
+        strncpy(newChar.name, input.c_str(), 19);
+        newChar.name[19] = '\0';
+        break;
+    }
+
+    while (true) {
+        std::cout << "Enter level (1-100): ";
+        std::getline(std::cin, input);
+        
+        try {
+            newChar.level = std::stoi(input);
+            if (newChar.level >= 1 && newChar.level <= 100) {
+                break;
+            }
+        } catch (...) {}
+        
         std::cout << "Invalid input. Enter level (1-100): ";
     }
-    std::cin.ignore();
 
-    std::cout << "Choose class (1-Warrior, 2-Mage, 3-Rogue, 0-None): ";
-    while (!(std::cin >> newChar.charClass) || newChar.charClass < 0 || newChar.charClass > 3) {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    while (true) {
+        std::cout << "Choose class (1-Warrior, 2-Mage, 3-Rogue, 0-None): ";
+        std::getline(std::cin, input);
+        
+        try {
+            newChar.charClass = std::stoi(input);
+            if (newChar.charClass >= 0 && newChar.charClass <= 3) {
+                break;
+            }
+        } catch (...) {}
+        
         std::cout << "Invalid input. Choose class (1-Warrior, 2-Mage, 3-Rogue, 0-None): ";
     }
-    std::cin.ignore();
 
     newChar.atk = 15;
     newChar.def = 10;
@@ -136,8 +170,11 @@ bool addCharacter(Character* chars, int& size) {
 
 void modifyCharacter(Character* chars, int size) {
     char name[20];
-    std::cout << "Enter character name: ";
-    std::cin.getline(name, 20);
+    bool validName = false;
+    while (!validName) {
+        std::cout << "Enter character name: ";
+        std::cin.getline(name, 20);
+    }
 
     Character* character = findCharacter(chars, size, name);
     if (character == nullptr) {
@@ -219,16 +256,22 @@ void findCharactersByStats(const Character* chars, int size, int min_atk, int mi
 void battleCharacters(Character* chars, int size) {
     char name1[20], name2[20];
     
-    std::cout << "Enter first character name: ";
-    std::cin.getline(name1, 20);
+    bool validName = false;
+    while (!validName) {
+        std::cout << "Enter first character name: ";
+        std::cin.getline(name1, 20);
+    }
     Character* char1 = findCharacter(chars, size, name1);
     if (char1 == nullptr) {
         std::cout << "First character not found." << std::endl;
         return;
     }
     
-    std::cout << "Enter second character name: ";
-    std::cin.getline(name2, 20);
+    validName = false;
+    while (!validName) {
+        std::cout << "Enter second character name: ";
+        std::cin.getline(name2, 20);
+    }
     Character* char2 = findCharacter(chars, size, name2);
     if (char2 == nullptr) {
         std::cout << "Second character not found." << std::endl;
@@ -241,11 +284,11 @@ void battleCharacters(Character* chars, int size) {
     std::cout << "Battle results:" << std::endl;
     
     if (power1 > power2) {
-        std::cout << char1->name << " win" << std::endl;
+        std::cout << char1->name << " wins!" << std::endl;
     } else if (power2 > power1) {
-        std::cout << char2->name << " win" << std::endl;
+        std::cout << char2->name << " wins!" << std::endl;
     } else {
-        std::cout << "draw" << std::endl;
+        std::cout << "Draw!" << std::endl;
     }
 }
 
@@ -254,7 +297,7 @@ int main() {
     int characterCount = 0;
     
     while (true) {
-        std::cout << "1. Add character" << std::endl;
+        std::cout << "\n1. Add character" << std::endl;
         std::cout << "2. Find character" << std::endl;
         std::cout << "3. Show all characters" << std::endl;
         std::cout << "4. Modify character" << std::endl;
@@ -273,12 +316,15 @@ int main() {
                 break;
             case 2: {
                 char name[20];
-                std::cout << "Enter character name: ";
-                std::cin.getline(name, 20);
+                bool validName = false;
+                while (!validName) {
+                    std::cout << "Enter character name: ";
+                    std::cin.getline(name, 20);
+                }
                 Character* found = findCharacter(characters, characterCount, name);
                 if (found != nullptr) {
                     std::cout << "Character found:" << std::endl;
-                    std::cout << "Name\t\tLVL\tHP\tATK\tDEF\tClass" << std::endl;
+                    std::cout << "Name\tLVL\tHP\tATK\tDEF\tClass" << std::endl;
                     printCharacter(*found);
                 } else {
                     std::cout << "Character not found." << std::endl;
@@ -294,9 +340,17 @@ int main() {
             case 5: {
                 int min_atk, min_def;
                 std::cout << "Enter minimum ATK: ";
-                std::cin >> min_atk;
+                while (!(std::cin >> min_atk)) {
+                    std::cin.clear();
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    std::cout << "Invalid input. Enter minimum ATK: ";
+                }
                 std::cout << "Enter minimum DEF: ";
-                std::cin >> min_def;
+                while (!(std::cin >> min_def)) {
+                    std::cin.clear();
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    std::cout << "Invalid input. Enter minimum DEF: ";
+                }
                 std::cin.ignore();
                 findCharactersByStats(characters, characterCount, min_atk, min_def);
                 break;
