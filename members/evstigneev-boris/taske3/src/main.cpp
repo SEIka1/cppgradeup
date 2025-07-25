@@ -19,6 +19,22 @@ int strLen(const char* str) {
     return len;
 }
 
+void strCpy_s(char* dest, size_t destSize, const char* src) {
+    if (!dest || !src || destSize == 0) return;
+
+    size_t i = 0;
+    while (src[i] != '\0') {
+        if (i >= destSize - 1) {
+            dest[0] = '\0';
+            return;
+        }
+        dest[i] = src[i];
+        ++i;
+    }
+    dest[i] = '\0';
+    return;
+}
+
 bool strCompare(const char* str1, const char* str2) {
     while (*str1 && *str2) {
         if (*str1 != *str2) {
@@ -155,7 +171,15 @@ bool addCharacter(Character* chars, int& size) {
     }
     
     newChar.hp = 100 + (newChar.level * newChar.def) / 10;
-    chars[size++] = newChar;
+    
+    strCpy_s(chars[size].name, sizeof(chars[size].name), newChar.name);
+    chars[size].level = newChar.level;
+    chars[size].hp = newChar.hp;
+    chars[size].atk = newChar.atk;
+    chars[size].def = newChar.def;
+    chars[size].charClass = newChar.charClass;
+    ++size;
+    
     return true;
 }
 
