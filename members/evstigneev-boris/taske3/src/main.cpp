@@ -8,7 +8,7 @@ struct Character {
     int hp;
     int atk;
     int def;
-    int charClass;
+    int charClass; // 0 - None, 1 - Warrior, 2 - Mage, 3 - Rogue
 };
 
 int strLen(const char* str) {
@@ -17,22 +17,6 @@ int strLen(const char* str) {
         len++;
     }
     return len;
-}
-
-void strcpy_s(char* dest, size_t destSize, const char* src) {
-    if (!dest || !src || destSize == 0) return;
-
-    size_t i = 0;
-    while (src[i] != '\0') {
-        if (i >= destSize - 1) {
-            dest[0] = '\0';
-            return;
-        }
-        dest[i] = src[i];
-        ++i;
-    }
-    dest[i] = '\0';
-    return;
 }
 
 bool strCompare(const char* str1, const char* str2) {
@@ -47,7 +31,7 @@ bool strCompare(const char* str1, const char* str2) {
 }
 
 void sortCharacters(Character* chars, int size) {
-    if (!chars || size <= 1) return;
+    if (chars == nullptr || size <= 1) return;
 
     for (int i = 0; i < size - 1; i++) {
         for (int j = 0; j < size - i - 1; j++) {
@@ -70,9 +54,8 @@ void sortCharacters(Character* chars, int size) {
     }
 }
 
-
 Character* findCharacter(Character* chars, int size, const char* name) {
-    if (!chars || size <= 0 || !name) return nullptr;
+    if (chars == nullptr || size <= 0 || name == nullptr) return nullptr;
 
     for (int i = 0; i < size; ++i) {
         if (strCompare(chars[i].name, name)) {
@@ -171,7 +154,7 @@ bool addCharacter(Character* chars, int& size) {
         default: break;
     }
     
-    newChar.hp = 100 + (newChar.level * (newChar.def / 10));
+    newChar.hp = 100 + (newChar.level * newChar.def) / 10;
     chars[size++] = newChar;
     return true;
 }
@@ -200,7 +183,7 @@ void modifyCharacter(Character* chars, int size) {
             while (!readIntInRange(newChar->level, 1, 100)) {
                 std::cout << "Invalid input. Enter new level (1-100): ";
             }
-            newChar->hp = 100 + (newChar->level * (newChar->def / 10));
+            newChar->hp = 100 + (newChar->level * newChar->def) / 10;
             break;
         case 2:
             std::cout << "New ATK (10-50): ";
@@ -209,11 +192,11 @@ void modifyCharacter(Character* chars, int size) {
             }
             break;
         case 3:
-            std::cout << "New DEF (1–50): ";
+            std::cout << "New DEF (1-50): ";
             while (!readIntInRange(newChar->def, 1, 50)) {
                 std::cout << "Invalid input. Enter new DEF (1-50): ";
             }
-            newChar->hp = 100 + (newChar->level * (newChar->def / 10));
+            newChar->hp = 100 + (newChar->level * newChar->def) / 10;
             break;
     }
 }
@@ -270,11 +253,11 @@ void handleFindCharacter(Character* chars, int count) {
     std::cin.getline(name, 20);
     Character* found = findCharacter(chars, count, name);
     if (found != nullptr) {
-        std::cout << "Character found:" << std::endl;
-        std::cout << "Name\t\tLVL\tHP\tATK\tDEF\tClass" << std::endl;
+        std::cout << "Character found:\n";
+        std::cout << "Name\t\tLVL\tHP\tATK\tDEF\tClass\n";
         printCharacter(*found);
     } else {
-        std::cout << "Character not found" << std::endl;
+        std::cout << "Character not found\n";
     }
 }
 
@@ -287,6 +270,7 @@ void handleFindByStats(Character* chars, int count) {
     std::cin.ignore();
     findCharactersByStats(chars, count, min_atk, min_def);
 }
+
 int main() {
     Character characters[10];
     int characterCount = 0;
