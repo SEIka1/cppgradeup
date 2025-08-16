@@ -3,6 +3,7 @@
 #include <vector>
 #include <stdexcept>
 #include <new>
+#include <cstddef>
 
 enum class ResourceType { FILE, MEMORY, NETWORK };
 enum class ResourceStatus { FREE, BUSY, LOCKED };
@@ -20,13 +21,13 @@ private:
 public:
     Resource(const std::string& id, size_t size, ResourceType type);
 
-    const std::string& id() const;
-    size_t size() const;
-    ResourceType type() const;
-    ResourceStatus status() const;
+    inline const std::string& id() const { return my_id; }
+    inline size_t size() const { return my_size; }
+    inline ResourceType type() const { return my_type; }
+    inline ResourceStatus status() const { return my_status; }
 
     void setSize(size_t newSize);
-    void setStatus(ResourceStatus status);
+    inline void setStatus(ResourceStatus status) { my_status = status; }
 };
 
 class ResourceManager {
@@ -40,7 +41,7 @@ private:
     size_t findByIdLinear(const std::string& id) const;
 
     template <typename Less>
-    void quickSort(Resource** arr, long left, long right, Less less) const;
+    void quickSort(Resource** arr, std::ptrdiff_t left, std::ptrdiff_t right, Less less) const;
 
     size_t partitionBySize(Resource** arr, size_t left, size_t right, size_t pivotIndex) const;
     void quickSelectK(Resource** arr, size_t left, size_t right, size_t k) const;
@@ -55,7 +56,7 @@ public:
     void clear();
     Resource& createResource(const std::string& id, size_t size, ResourceType type);
     void addResource(Resource* resource);
-    size_t resourceCount() const;
+    inline size_t resourceCount() const { return m_count; }
     void sortBySize();
     Resource& getResource(size_t index);
     const Resource* getResource(size_t index) const;

@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <mutex>
 
 class ResourceLogger {
 public:
@@ -8,4 +9,5 @@ public:
 
 private:
     std::string m_filename;
+    mutable std::mutex m_mutex;
 };

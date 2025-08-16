@@ -5,18 +5,25 @@
 #include <iomanip>
 #include <sstream>
 
-ResourceLogger::ResourceLogger(const std::string& filename): m_filename(filename) {}
+ResourceLogger::ResourceLogger(const std::string& filename)
+    : m_filename(filename) {
+    if (m_filename.empty()) {
+        throw std::invalid_argument("log filename must not be empty");
+    }
+}
 
 void ResourceLogger::log(const std::string& message) const {
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     std::ofstream out(m_filename, std::ios::app);
-    std::time_t t = std::time(nullptr);
+    if (!out.is_open()) throw std::runtime_error("failed to open log file");
+
+    std::time_t now = std::time(nullptr);
     std::tm tm_snapshot{};
-    #if defined(_WIN32)
-        localtime_s(&tm_snapshot, &t);
-    #else
-        localtime_r(&t, &tm_snapshot);
-    #endif
+
+    if (localtime_r(&now, &tm_snapshot) == nullptr) {
+        throw std::runtime_error("localtime_r failed");
+    }
 
     std::ostringstream oss;
     oss << '[' << (tm_snapshot.tm_year + 1900) << '-'
