@@ -27,8 +27,7 @@ void Resource::setSize(size_t newSize) {
     my_size = newSize;
 }
 
-ResourceManager::ResourceManager()
-    : m_resources(nullptr), m_count(0), m_capacity(0) 
+ResourceManager::ResourceManager() : m_resources(nullptr), m_count(0), m_capacity(0) 
 {
     resize(8);
 }
@@ -41,7 +40,7 @@ ResourceManager::~ResourceManager() {
 }
 
 void ResourceManager::clear() {
-    if (!m_resources) { m_count = 0; return; }
+    if (m_resources == nullptr) { m_count = 0; return; }
     for (size_t i = 0; i < m_count; ++i) {
         delete m_resources[i];
         m_resources[i] = nullptr;
@@ -54,7 +53,7 @@ void ResourceManager::resize(size_t newCapacity) {
     if (newCapacity <= m_capacity) return;
 
     Resource** newArray = new (std::nothrow) Resource*[newCapacity];
-    if (!newArray) {
+    if (newArray == nullptr) {
         throw std::runtime_error("allocation failed");
     }
 
@@ -67,7 +66,7 @@ void ResourceManager::resize(size_t newCapacity) {
 }
 
 size_t ResourceManager::findByIdLinear(const std::string& id) const {
-    if (!m_resources) return m_count;
+    if (m_resources == nullptr) return m_count;
     for (size_t i = 0; i < m_count; ++i) {
         if (m_resources[i] && m_resources[i]->id() == id) return i;
     }
@@ -83,7 +82,7 @@ Resource& ResourceManager::createResource(const std::string& id, size_t size, Re
     }
 
     Resource* newResource = new (std::nothrow) Resource(id, size, type);
-    if (!newResource) {
+    if (newResource == nullptr) {
         throw std::runtime_error("Resource allocation failed");
     }
 
@@ -102,7 +101,7 @@ Resource& ResourceManager::createResource(const std::string& id, size_t size, Re
 }
 
 void ResourceManager::addResource(Resource* resource) {
-    if (!resource) throw std::invalid_argument("null pointer");
+    if (resource == nullptr) throw std::invalid_argument("null pointer");
     if (m_count >= MAX_RESOURCES) throw std::runtime_error("max capacity reached");
     if (findByIdLinear(resource->id()) != m_count) {
         throw std::runtime_error("resource with the same id already exists");
@@ -116,7 +115,7 @@ void ResourceManager::addResource(Resource* resource) {
 }
 
 void ResourceManager::sortBySize() {
-    if (!m_resources || m_count < 2) return;
+    if (m_resources == nullptr || m_count < 2) return;
     auto lessBySize = [](const Resource* a, const Resource* b) {
         return a->size() < b->size();
     };
@@ -124,17 +123,17 @@ void ResourceManager::sortBySize() {
 }
 
 Resource& ResourceManager::getResource(size_t index) {
-    if (!m_resources || index >= m_count) {
+    if (m_resources == nullptr || index >= m_count) {
         throw std::out_of_range("index out of range");
     }
-    if (!m_resources[index]) {
+    if (m_resources[index] == nullptr) {
         throw std::runtime_error("null pointer");
     }
     return *m_resources[index];
 }
 
 const Resource* ResourceManager::getResource(size_t index) const {
-    if (!m_resources || index >= m_count) {
+    if (m_resources == nullptr || index >= m_count) {
         throw std::out_of_range("index out of range");
     }
     return m_resources[index];
@@ -142,7 +141,7 @@ const Resource* ResourceManager::getResource(size_t index) const {
 
 template <typename Less>
 void ResourceManager::quickSort(Resource** arr, std::ptrdiff_t left, std::ptrdiff_t right, Less less) const {
-    if (!arr || left < 0 || right < 0 || left >= right) return;
+    if (arr == nullptr || left < 0 || right < 0 || left >= right) return;
 
     std::ptrdiff_t i = left;
     std::ptrdiff_t j = right;
@@ -163,7 +162,7 @@ void ResourceManager::quickSort(Resource** arr, std::ptrdiff_t left, std::ptrdif
 std::vector<Resource*> ResourceManager::filterByType(ResourceType type) const {
     std::vector<Resource*> result;
     result.reserve(m_count);
-    if (!m_resources) return result;
+    if (m_resources == nullptr) return result;
 
     for (size_t i = 0; i < m_count; ++i) {
         if (m_resources[i] && m_resources[i]->type() == type) {
@@ -174,7 +173,7 @@ std::vector<Resource*> ResourceManager::filterByType(ResourceType type) const {
 }
 
 const Resource* ResourceManager::findResource(const std::string& id) const {
-    if (!m_resources || m_count == 0) return nullptr;
+    if (m_resources == nullptr || m_count == 0) return nullptr;
     for (size_t i = 0; i < m_count; ++i) {
         if (m_resources[i] && m_resources[i]->id() == id) {
             return m_resources[i];
@@ -199,7 +198,7 @@ size_t ResourceManager::partitionBySize(Resource** arr, size_t left, size_t righ
 }
 
 void ResourceManager::quickSelectK(Resource** arr, size_t left, size_t right, size_t k) const {
-    if (!arr || left > right) return;
+    if (arr == nullptr || left > right) return;
     while (left < right) {
         size_t pivotIndex = left + (right - left) / 2;
         pivotIndex = partitionBySize(arr, left, right, pivotIndex);
@@ -215,18 +214,18 @@ void ResourceManager::quickSelectK(Resource** arr, size_t left, size_t right, si
 }
 
 Resource** ResourceManager::findKSmallest(size_t k) const {
-    if (!m_resources || k == 0) return nullptr;
+    if (m_resources == nullptr || k == 0) return nullptr;
     if (k > m_count) k = m_count;
 
     Resource** temp = new (std::nothrow) Resource*[m_count];
-    if (!temp) throw std::runtime_error("allocation failed");
+    if (temp == nullptr) throw std::runtime_error("allocation failed");
 
     for (size_t i = 0; i < m_count; ++i) temp[i] = m_resources[i];
 
     quickSelectK(temp, 0, m_count - 1, k - 1);
 
     Resource** result = new (std::nothrow) Resource*[k];
-    if (!result) { delete[] temp; throw std::runtime_error("result allocation failed"); }
+    if (result == nullptr) { delete[] temp; throw std::runtime_error("result allocation failed"); }
 
     for (size_t i = 0; i < k; ++i) result[i] = temp[i];
 
