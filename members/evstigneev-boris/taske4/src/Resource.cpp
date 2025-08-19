@@ -1,5 +1,6 @@
 #include "../include/Resource.h"
 #include <utility>
+#include <algorithm>
 
 void Resource::validateId() const {
     if (my_id.empty() || my_id.size() > 32) {
@@ -214,21 +215,33 @@ void ResourceManager::quickSelectK(Resource** arr, size_t left, size_t right, si
 }
 
 Resource** ResourceManager::findKSmallest(size_t k) const {
-    if (m_resources == nullptr || k == 0) return nullptr;
+    if (k == 0 || m_count == 0) return nullptr;
     if (k > m_count) k = m_count;
+    if (k > MAX_RESOURCES) {
+        throw std::invalid_argument("k > MAX_RESOURCES");
+    }
 
-    Resource** temp = new (std::nothrow) Resource*[m_count];
-    if (temp == nullptr) throw std::runtime_error("allocation failed");
+    if (k == 1) {
+        Resource** minRes = new Resource*[1];
+        minRes[0] = *std::min_element(m_resources, m_resources + m_count, [](Resource* a, Resource* b) { return a->size() < b->size(); });
+        return minRes;
+    }
 
-    for (size_t i = 0; i < m_count; ++i) temp[i] = m_resources[i];
+    ResourceArray temp(new (std::nothrow) Resource*[m_count]);
+    if (!temp.get()) throw std::runtime_error("allocation failed");
 
-    quickSelectK(temp, 0, m_count - 1, k - 1);
+    for (size_t i = 0; i < m_count; ++i) {
+        temp[i] = m_resources[i];
+    }
 
-    Resource** result = new (std::nothrow) Resource*[k];
-    if (result == nullptr) { delete[] temp; throw std::runtime_error("result allocation failed"); }
+    quickSelectK(temp.get(), 0, m_count - 1, k - 1);
 
-    for (size_t i = 0; i < k; ++i) result[i] = temp[i];
+    Resource** res = new (std::nothrow) Resource*[k];
+    if (!res) throw std::runtime_error("allocation failed");
 
-    delete[] temp;
-    return result;
+    for (size_t i = 0; i < k; ++i) {
+        res[i] = temp[i];
+    }
+
+    return res;
 }

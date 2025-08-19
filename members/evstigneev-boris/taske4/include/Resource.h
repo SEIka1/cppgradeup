@@ -46,6 +46,34 @@ private:
     size_t partitionBySize(Resource** arr, size_t left, size_t right, size_t pivotIndex) const;
     void quickSelectK(Resource** arr, size_t left, size_t right, size_t k) const;
 
+    class ResourceArray {
+    public:
+        explicit ResourceArray(Resource** ptr) : m_ptr(ptr) {}
+        ~ResourceArray() { delete[] m_ptr; }
+
+        ResourceArray(const ResourceArray&) = delete;
+        ResourceArray& operator=(const ResourceArray&) = delete;
+
+        ResourceArray(ResourceArray&& other) noexcept : m_ptr(other.m_ptr) {
+            other.m_ptr = nullptr;
+        }
+
+        ResourceArray& operator=(ResourceArray&& other) noexcept {
+            if (this != &other) {
+                delete[] m_ptr;
+                m_ptr = other.m_ptr;
+                other.m_ptr = nullptr;
+            }
+            return *this;
+        }
+
+        Resource** get() const { return m_ptr; }
+        Resource*& operator[](size_t idx) const { return m_ptr[idx]; }
+
+    private:
+        Resource** m_ptr;
+    };
+
 public:
     ResourceManager();
     ~ResourceManager();
